@@ -35,27 +35,26 @@ data = data.dropna(how="all") # Clean up empty rows
 
 # --- SIDEBAR: INPUT ---
 with st.sidebar:
-    st.header("Add New Flip")
-    name = st.text_input("Item Name")
-    cat = st.selectbox("Category", ["Electronics", "Clothing", "Collectibles", "Other"])
-    buy_p = st.number_input("Purchase Price ($)", min_value=0.0, step=1.0)
-    sell_p = st.number_input("Target Sale Price ($)", min_value=0.0, step=1.0)
-    plat = st.selectbox("Platform", ["eBay", "Poshmark", "FB Marketplace", "Mercari"])
-    
-    if st.button("Add to Inventory"):
-        new_item = {
-            "Item Name": name, "Category": cat, "Buy Price": buy_p, 
-            "Target Sell Price": sell_p, "Platform": plat, "Status": "Listed"
-        }
-        st.session_state.inventory = pd.concat([st.session_state.inventory, pd.DataFrame([new_item])], ignore_index=True)
-        st.success(f"Added {name}!")
+    st.header("Add New Item")
+    with st.form("add_form", clear_on_submit=True):
+        name = st.text_input("Item Name")
+        cat = st.selectbox("Category", ["Electronics", "Clothing", "Media", "Other"])
+        buy_p = st.number_input("Buy Price", min_value=0.0)
+        sell_p = st.number_input("Target Price", min_value=0.0)
+        plat = st.text_input("Platform (e.g. eBay)")
         
-        # Combine and update
-         updated_df = pd.concat([data, new_row], ignore_index=True)
-         conn.update(spreadsheet=url, data=updated_df)
-         st.success("Data synced to Google Sheets!")
-         st.rerun() 
-        
+        submit = st.form_submit_button("Save to Cloud")
+
+    if submit:
+        # Create new row
+        new_row = pd.DataFrame([{
+            "Item Name": name, 
+            "Category": cat, 
+            "Buy Price": buy_p, 
+            "Target Sell Price": sell_p, 
+            "Platform": plat, 
+            "Status": "Listed"
+        }])
 
 # --- MAIN DASHBOARD ---
 # --- NAVIGATION TABS ---
