@@ -46,6 +46,7 @@ with tab1:
 # --- TAB 2: ACTIVE LISTINGS ---
 with tab2:
     st.header("Inventory Status")
+    st.write("Statuses found in sheet:", data["Status"].unique().tolist()
     
     # We define the column configuration here to force the dropdown
     edited_df = st.data_editor(
