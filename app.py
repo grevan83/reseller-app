@@ -80,7 +80,7 @@ with tab2:
                 required=True,
             ),
             "Buyer Name": st.column_config.TextColumn("Buyer Name"),
-            "Provider": st.column_config.SelectionboColumn(
+            "Provider": st.column_config.SelectionboxColumn(
                 "Provider", 
                 options=["Royal Mail", "Evri", "InPost", "Yodel"], 
                 required=True
