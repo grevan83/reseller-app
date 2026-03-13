@@ -49,6 +49,7 @@ with tab1:
             updated_df = pd.concat([data, new_row], ignore_index=True)
             conn.update(spreadsheet=url, worksheet="Sheet1", data=updated_df)
             st.success(f"Added {name}!")
+            st.cache_data.clear()
             st.rerun()
 
 # --- TAB 2: ACTIVE LISTINGS ---
