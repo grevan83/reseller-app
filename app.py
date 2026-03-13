@@ -14,7 +14,7 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # Helper to load data fresh
 @st.cache_data(ttl=0)
 def load_data():
-    return conn.read(spreadsheet=url, usecols=[0,1,2,3,4,5])
+    return conn.read(spreadsheet=url)
 
 data = load_data().dropna(how="all")
 
