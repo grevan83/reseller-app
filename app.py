@@ -84,4 +84,5 @@ with tab3:
                     data.at[index, "Status"] = "Shipped"
                     conn.update(spreadsheet=url, worksheet = "Sheet1", data=data)
                     st.success(f"Moved {row['Item Name']} to Shipped!")
+                    st.cache_data.clear()
                     st.rerun()
