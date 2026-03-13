@@ -45,25 +45,28 @@ with tab1:
 
 # --- TAB 2: ACTIVE LISTINGS ---
 with tab2:
-    st.header("Inventory Overview")
+    st.header("Inventory Status")
     
-    # 1. Show the full data so we can see if it's reading correctly
-    st.write("Raw data from Google Sheet:")
-    st.dataframe(data) 
-    
-    # 2. Logic to filter for 'Listed'
-    st.subheader("Manage Status")
-    active_items = data[data["Status"] == "Listed"]
-    
-    if active_items.empty:
-        st.warning("No items with status 'Listed' found. Check your sheet headers!")
-    else:
-        edited_df = st.data_editor(active_items, use_container_width=True)
-        if st.button("Save Changes"):
-            # This pushes the edited rows back to the main data
-            data.update(edited_df)
-            conn.update(spreadsheet=url, data=data)
-            st.rerun()
+    # We define the column configuration here to force the dropdown
+    edited_df = st.data_editor(
+        data, 
+        column_config={
+            "Status": st.column_config.SelectboxColumn(
+                "Status",
+                help="Change item status",
+                options=["Listed", "Sold", "Returned", "Shipped"],
+                required=True,
+            )
+        },
+        use_container_width=True,
+        key="status_editor"
+    )
+
+    if st.button("Save Changes"):
+        conn.update(spreadsheet=url, data=edited_df)
+        st.success("Cloud Updated!")
+        st.rerun()
+Why this is likely failing:
 
 # --- TAB 3: PICK & SHIP ---
 with tab3:
