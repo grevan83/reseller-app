@@ -84,7 +84,7 @@ with tab2:
                 "Provider", 
                 options=["Royal Mail", "Evri", "InPost", "Yodel"], 
                 required=True
-            )
+            ),
         },
         use_container_width=True,
         key="inventory_editor"
