@@ -31,12 +31,12 @@ tab1, tab2, tab3 = st.tabs(["🆕 Add Inventory", "📦 Active Listings", "🚚 
 
 # --- TAB 1: DATA ENTRY ---
 with tab1:
-    st.header("Log New Find")
+    st.header("Enter New Item")
     with st.form("new_item_form", clear_on_submit=True):
         col1, col2 = st.columns(2)
         with col1:
             name = st.text_input("Item Name")
-            cat = st.selectbox("Category", ["Electronics", "Clothing", "Toys", "Other"])
+            cat = st.selectbox("Category", ["Electronics", "Clothing", "Toys", "Jewelry", "Kitchen", "Media", "Other"])
         with col2:
             buy_p = st.number_input("Purchase Price", min_value=0.0)
             platform = st.selectbox("Platform", ["Facebook Marketplace", "Vinted", "What Not", "Local"])
@@ -59,6 +59,10 @@ with tab2:
     active_mask=(df["Status"] != "Shipped")
     active_df=df[active_mask]
 
+    for col in ["Buyer Name", "Shipping Service"]
+        if col not in data.columns:
+            data[col] = ""
+
     if active_df.empty:
         st.write("Nothing in inventory.")
     else:
@@ -74,6 +78,10 @@ with tab2:
                 help="Change item status",
                 options=["Listed", "Sold", "Returned", "Shipped"],
                 required=True,
+            )
+            "Buyer Name": st.column_config,TextColumn("Buyer Name")
+            "Provider": st.column_config.SelectionboColumn(
+                "Provider", options=["Royal Mail", "Evri", "InPost", "Yodel"], required=True
             )
         },
         use_container_width=True,
