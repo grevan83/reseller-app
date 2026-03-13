@@ -3,86 +3,129 @@ import pandas as pd
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
-# 1. PAGE SETUP
-st.set_page_config(page_title="Reseller Flow", layout="wide", initial_sidebar_state="collapsed")
-st.title("🚀 Reseller Operations")
 
-# 2. DATA CONNECTION
-# Make sure your 'spreadsheet' and 'worksheet' keys are in your Secrets!
+
+st.set_page_config(page_title="Reseller Pro Cloud", layout="wide")
+st.title("📈 Cloud Inventory Manager")
+
+# 1. Connect to Google Sheets
+# Replace 'your_sheet_url_here' with your actual Google Sheet link
+st.set_page_config(page_title="Reseller Pro", layout="wide")
+url = "https://docs.google.com/spreadsheets/d/1E-biBsQA9R8WRlD8tVGLCKFGyBEQVjd_ZSrDHePqQuo/edit?usp=sharing"
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-def load_data():
-    return conn.read(ttl="0s") # Set ttl to 0 so it always pulls fresh data
+try:
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    # Try to perform a test read
+    data = conn.read(spreadsheet=url, worksheet="Sheet1")
+    data = data.dropna(how="all")
+    st.sidebar.success("✅ Connected to Google Sheets")
+except Exception as e:
+    st.error("Authentication failed. Check if your Service Account Email is an 'Editor' on the Google Sheet.")
+    st.write("There is an issue with your Secrets formatting or Google Permissions.")
+    st.info(f"Error Details: {e}")
+    st.stop() # This prevents the rest of the app from running and crashing
 
-df = load_data()
+# --- The rest of your app only runs if the connection succeeds ---
 
-# 3. THE WORKFLOW TABS
-tab_add, tab_manage, tab_ship = st.tabs(["➕ Add Item", "📋 Inventory Manager", "🚚 Ship Orders"])
+# 2. Read Existing Data
+data = conn.read(spreadsheet=url, usecols=[0,1,2,3,4,5])
+data = data.dropna(how="all") # Clean up empty rows
 
-# --- TAB: ADD ITEM (Sourcing Phase) ---
-with tab_add:
-    with st.form("quick_add", clear_on_submit=True):
-        col1, col2, col3 = st.columns([2, 1, 1])
-        name = col1.text_input("Item Name", placeholder="What did you find?")
-        buy_p = col2.number_input("Cost", min_value=0.0, step=1.0)
-        loc = col3.text_input("Location", placeholder="Bin A, Shelf 1...")
+# --- SIDEBAR: INPUT ---
+with st.sidebar:
+    st.header("Add New Item")
+    with st.form("add_form", clear_on_submit=True):
+        name = st.text_input("Item Name")
+        cat = st.selectbox("Category", ["Electronics", "Clothing", "Media", "Other"])
+        buy_p = st.number_input("Buy Price", min_value=0.0)
+        sell_p = st.number_input("Target Price", min_value=0.0)
+        plat = st.text_input("Platform (e.g. eBay)")
         
-        if st.form_submit_button("Log Item"):
-            new_entry = pd.DataFrame([{
-                "Item Name": name, "Cost": buy_p, "Location": loc,
-                "Status": "Listed", "Added": datetime.now().strftime("%Y-%m-%d")
-            }])
-            updated_df = pd.concat([df, new_entry], ignore_index=True)
-            conn.update(data=updated_df)
-            st.success(f"Logged {name} to {loc}!")
-            st.rerun()
+        submit = st.form_submit_button("Save to Cloud")
 
-# --- TAB: MANAGE (Active Status Phase) ---
-with tab_manage:
-    # We only want to see things we still have in the house
-    active_df = df[df["Status"] != "Shipped"].copy()
-    
-    st.subheader(f"Current Stock ({len(active_df)} items)")
-    
-    # The 'on the fly' editor
-    # Changing a status here to 'Sold' automatically sends it to the Ship tab
-    edited_df = st.data_editor(
-        active_df,
-        column_config={
-            "Status": st.column_config.SelectboxColumn(
-                "Status", options=["Listed", "Sold", "Returned"], required=True
-            ),
-            "Cost": st.column_config.NumberColumn(format="$%.2f")
-        },
-        use_container_width=True,
-        key="editor",
-        hide_index=True
-    )
-    
-    if st.button("Save All Status Changes"):
-        # Update main dataframe with edited rows
-        df.update(edited_df)
-        conn.update(data=df)
-        st.success("Cloud Updated!")
+    if submit:
+        # Create new row
+        new_row = pd.DataFrame([{
+            "Item Name": name, 
+            "Category": cat, 
+            "Buy Price": buy_p, 
+            "Target Sell Price": sell_p, 
+            "Platform": plat, 
+            "Status": "Listed"
+        }])
+        
+        # Combine and update
+        updated_df = pd.concat([data, new_row], ignore_index=True)
+        conn.update(spreadsheet=url, data=updated_df)
+        st.success("Data synced to Google Sheets!")
         st.rerun()
 
-# --- TAB: SHIP (Fulfillment Phase) ---
-with tab_ship:
-    sold_items = df[df["Status"] == "Sold"]
+# --- MAIN DASHBOARD ---
+# --- NAVIGATION TABS ---
+tab1, tab2, tab3 = st.tabs(["🆕 Add Inventory", "📦 Active Listings", "🚚 Shipping Tasks"])
+
+# --- TAB 1: DATA ENTRY ---
+with tab1:
+    st.header("Log New Find")
+    with st.form("new_item_form", clear_on_submit=True):
+        col1, col2 = st.columns(2)
+        with col1:
+            name = st.text_input("Item Name")
+            cat = st.selectbox("Category", ["Electronics", "Clothing", "Toys", "Other"])
+        with col2:
+            buy_p = st.number_input("Purchase Price", min_value=0.0)
+            platform = st.selectbox("Primary Platform", ["eBay", "Poshmark", "Mercari", "Local"])
+        
+        if st.form_submit_button("Add to Inventory"):
+            new_data = pd.DataFrame([{
+                "Item Name": name, "Category": cat, "Buy Price": buy_p, 
+                "Platform": platform, "Status": "Listed", "Date Added": datetime.now().strftime("%Y-%m-%d")
+            }])
+            updated_df = pd.concat([data, new_data], ignore_index=True)
+            conn.update(spreadsheet=url, data=updated_df)
+            st.success("Item Listed!")
+            st.rerun()
+
+# --- TAB 2: STATUS MANAGER ---
+with tab2:
+    st.header("Inventory Status")
+    st.info("Change an item to 'Sold' here to move it to the Shipping list.")
     
-    if sold_items.empty:
-        st.info("No pending shipments. Go find some more profit!")
+    # We only show items that aren't 'Shipped' or 'Archived'
+    active_items = data[data["Status"].isin(["Listed", "Sold"])]
+    
+    edited_data = st.data_editor(
+        active_items,
+        column_config={
+            "Status": st.column_config.SelectboxColumn("Status", options=["Listed", "Sold", "Returned"])
+        },
+        use_container_width=True,
+        key="status_editor"
+    )
+
+    if st.button("Update Statuses"):
+        # This logic merges the edits back into the main Google Sheet
+        data.update(edited_data)
+        conn.update(spreadsheet=url, data=data)
+        st.success("Inventory Updated!")
+        st.rerun()
+
+# --- TAB 3: PICK & SHIP (The Task List) ---
+with tab3:
+    st.header("Items to Ship")
+    # Only items marked as 'Sold' appear here
+    shipping_list = data[data["Status"] == "Sold"]
+    
+    if shipping_list.empty:
+        st.write("✅ All orders shipped! Time to source more.")
     else:
-        st.subheader(f"Items to Pick & Pack ({len(sold_items)})")
-        for i, row in sold_items.iterrows():
-            col_info, col_btn = st.columns([4, 1])
-            with col_info:
-                st.write(f"**{row['Item Name']}**")
-                st.caption(f"📍 Location: {row['Location']} | Cost: ${row['Cost']}")
-            
-            # This is your final workflow trigger
-            if col_btn.button("Mark Shipped", key=f"ship_{i}"):
-                df.at[i, "Status"] = "Shipped"
-                conn.update(data=df)
-                st.toast(f"Shipped {row['Item Name']}!")
-                st.rerun()
+        for index, row in shipping_list.iterrows():
+            with st.expander(f"SHIP: {row['Item Name']} ({row['Platform']})"):
+                st.write(f"**Platform:** {row['Platform']}")
+                st.write(f"**Category:** {row['Category']}")
+                if st.button(f"Mark as Shipped", key=f"ship_{index}"):
+                    data.at[index, "Status"] = "Shipped"
+                    conn.update(spreadsheet=url, data=data)
+                    st.success(f"Moved {row['Item Name']} to Archive")
+                    st.rerun()
