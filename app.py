@@ -1,52 +1,53 @@
 import streamlit as st
+from streamlit_gsheets import GSheetsConnection
 import pandas as pd
-from datetime import datetime
 
-# --- APP CONFIG ---
-st.set_page_config(page_title="Reseller Pro", layout="wide")
-st.title("📦 Reseller Inventory Tracker")
+st.set_page_config(page_title="Reseller Pro Cloud", layout="wide")
+st.title("📈 Cloud Inventory Manager")
 
-# Initialize data storage (In a real app, this would be a database/CSV)
-if 'inventory' not in st.session_state:
-    st.session_state.inventory = pd.DataFrame(
-        columns=["Item Name", "Category", "Buy Price", "Target Sell Price", "Platform", "Status"]
-    )
+# 1. Connect to Google Sheets
+# Replace 'your_sheet_url_here' with your actual Google Sheet link
+url = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE/edit#gid=0"
+conn = st.connection("gsheets", type=GSheetsConnection)
 
-# --- SIDEBAR: ADD NEW ITEM ---
+# 2. Read Existing Data
+data = conn.read(spreadsheet=url, usecols=[0,1,2,3,4,5])
+data = data.dropna(how="all") # Clean up empty rows
+
+# --- SIDEBAR: INPUT ---
 with st.sidebar:
-    st.header("Add New Flip")
-    name = st.text_input("Item Name")
-    cat = st.selectbox("Category", ["Electronics", "Clothing", "Collectibles", "Other"])
-    buy_p = st.number_input("Purchase Price ($)", min_value=0.0, step=1.0)
-    sell_p = st.number_input("Target Sale Price ($)", min_value=0.0, step=1.0)
-    plat = st.selectbox("Platform", ["eBay", "Poshmark", "FB Marketplace", "Mercari"])
-    
-    if st.button("Add to Inventory"):
-        new_item = {
-            "Item Name": name, "Category": cat, "Buy Price": buy_p, 
-            "Target Sell Price": sell_p, "Platform": plat, "Status": "Listed"
-        }
-        st.session_state.inventory = pd.concat([st.session_state.inventory, pd.DataFrame([new_item])], ignore_index=True)
-        st.success(f"Added {name}!")
+    st.header("Add New Item")
+    with st.form("add_form", clear_on_submit=True):
+        name = st.text_input("Item Name")
+        cat = st.selectbox("Category", ["Electronics", "Clothing", "Media", "Other"])
+        buy_p = st.number_input("Buy Price", min_value=0.0)
+        sell_p = st.number_input("Target Price", min_value=0.0)
+        plat = st.text_input("Platform (e.g. eBay)")
+        
+        submit = st.form_submit_button("Save to Cloud")
+
+    if submit:
+        # Create new row
+        new_row = pd.DataFrame([{
+            "Item Name": name, 
+            "Category": cat, 
+            "Buy Price": buy_p, 
+            "Target Sell Price": sell_p, 
+            "Platform": plat, 
+            "Status": "Listed"
+        }])
+        
+        # Combine and update
+        updated_df = pd.concat([data, new_row], ignore_index=True)
+        conn.update(spreadsheet=url, data=updated_df)
+        st.success("Data synced to Google Sheets!")
+        st.rerun()
 
 # --- MAIN DASHBOARD ---
-col1, col2, col3 = st.columns(3)
+st.subheader("Live Inventory")
+st.dataframe(data, use_container_width=True)
 
-# Quick Stats
-total_invested = st.session_state.inventory["Buy Price"].sum()
-potential_revenue = st.session_state.inventory["Target Sell Price"].sum()
-est_profit = potential_revenue - (total_invested * 1.13) # Rough estimate factoring 13% fees
-
-col1.metric("Total Invested", f"${total_invested:,.2f}")
-col2.metric("Potential Revenue", f"${potential_revenue:,.2f}")
-col3.metric("Est. Net Profit", f"${est_profit:,.2f}", delta_color="normal")
-
-st.divider()
-
-# --- INVENTORY TABLE ---
-st.subheader("Current Listings")
-st.dataframe(st.session_state.inventory, use_container_width=True)
-
-if st.button("Clear All Data"):
-    st.session_state.inventory = pd.DataFrame(columns=st.session_state.inventory.columns)
-    st.rerun()
+# Simple Analytics
+if not data.empty:
+    total_spent = data["Buy Price"].sum()
+    st.metric("Total Capital Deployed", f"${total_spent:,.2f}")
