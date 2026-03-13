@@ -43,17 +43,27 @@ with tab1:
             st.success(f"Added {name}!")
             st.rerun()
 
-# --- TAB 2: STATUS MANAGER ---
+# --- TAB 2: ACTIVE LISTINGS ---
 with tab2:
-    st.header("Inventory Status")
+    st.header("Inventory Overview")
     
-    # Allow user to edit status directly
-    edited_df = st.data_editor(data, use_container_width=True, key="inventory_editor")
+    # 1. Show the full data so we can see if it's reading correctly
+    st.write("Raw data from Google Sheet:")
+    st.dataframe(data) 
     
-    if st.button("Save Status Changes"):
-        conn.update(spreadsheet=url, data=edited_df)
-        st.success("Cloud Updated!")
-        st.rerun()
+    # 2. Logic to filter for 'Listed'
+    st.subheader("Manage Status")
+    active_items = data[data["Status"] == "Listed"]
+    
+    if active_items.empty:
+        st.warning("No items with status 'Listed' found. Check your sheet headers!")
+    else:
+        edited_df = st.data_editor(active_items, use_container_width=True)
+        if st.button("Save Changes"):
+            # This pushes the edited rows back to the main data
+            data.update(edited_df)
+            conn.update(spreadsheet=url, data=data)
+            st.rerun()
 
 # --- TAB 3: PICK & SHIP ---
 with tab3:
