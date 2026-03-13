@@ -34,33 +34,33 @@ data = data.dropna(how="all") # Clean up empty rows
 
 
 # --- SIDEBAR: INPUT ---
-\n with st.sidebar:
-    st.header("Add New Item")
-    with st.form("add_form", clear_on_submit=True):
-        name = st.text_input("Item Name")
-        cat = st.selectbox("Category", ["Electronics", "Clothing", "Media", "Other"])
-        buy_p = st.number_input("Buy Price", min_value=0.0)
-        sell_p = st.number_input("Target Price", min_value=0.0)
-        plat = st.text_input("Platform (e.g. eBay)")
+#with st.sidebar:
+ #   st.header("Add New Item")
+  #  with st.form("add_form", clear_on_submit=True):
+   #     name = st.text_input("Item Name")
+    #    cat = st.selectbox("Category", ["Electronics", "Clothing", "Media", "Other"])
+     #   buy_p = st.number_input("Buy Price", min_value=0.0)
+      #  sell_p = st.number_input("Target Price", min_value=0.0)
+       # plat = st.text_input("Platform (e.g. eBay)")
         
-        submit = st.form_submit_button("Save to Cloud")
+        #submit = st.form_submit_button("Save to Cloud")
 
-    if submit:
+   # if submit:
         # Create new row
-        new_row = pd.DataFrame([{
-            "Item Name": name, 
-            "Category": cat, 
-            "Buy Price": buy_p, 
-            "Target Sell Price": sell_p, 
-            "Platform": plat, 
-            "Status": "Listed"
-        }])
+    #    new_row = pd.DataFrame([{
+    #        "Item Name": name, 
+    #        "Category": cat, 
+    #        "Buy Price": buy_p, 
+    #        "Target Sell Price": sell_p, 
+    #        "Platform": plat, 
+    #        "Status": "Listed"
+    #    }])
         
         # Combine and update
-        updated_df = pd.concat([data, new_row], ignore_index=True)
-        conn.update(spreadsheet=url, data=updated_df)
-        st.success("Data synced to Google Sheets!")
-        st.rerun() \n
+        #updated_df = pd.concat([data, new_row], ignore_index=True)
+        #conn.update(spreadsheet=url, data=updated_df)
+        #st.success("Data synced to Google Sheets!")
+        #st.rerun() \n
         
 
 # --- MAIN DASHBOARD ---
