@@ -57,10 +57,27 @@ with st.sidebar:
         st.rerun()
 
 # --- MAIN DASHBOARD ---
-st.subheader("Live Inventory")
-st.dataframe(data, use_container_width=True)
+st.subheader("Inventory Management")
 
-# Simple Analytics
-if not data.empty:
-    total_spent = data["Buy Price"].sum()
-    st.metric("Total Capital Deployed", f"${total_spent:,.2f}")
+# 1. Use the data editor to allow status updates
+edited_df = st.data_editor(
+    data,
+    column_config={
+        "Status": st.column_config.SelectboxColumn(
+            "Status",
+            options=["Listed", "Sold", "Returned"],
+            required=True,
+        )
+    },
+    disabled=["Item Name", "Buy Price"], # Keep these locked to prevent accidents
+    use_container_width=True
+)
+
+# 2. A "Sync Changes" button
+if st.button("Save Changes to Cloud"):
+    try:
+        conn.update(spreadsheet=url, data=edited_df)
+        st.success("Cloud updated successfully!")
+        st.rerun()
+    except Exception as e:
+        st.error(f"Update failed: {e}")
