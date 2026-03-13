@@ -31,7 +31,7 @@ with tab1:
             cat = st.selectbox("Category", ["Electronics", "Clothing", "Toys", "Other"])
         with col2:
             buy_p = st.number_input("Purchase Price", min_value=0.0)
-            platform = st.selectbox("Platform", ["eBay", "Poshmark", "Mercari", "Local"])
+            platform = st.selectbox("Platform", ["Facebook Marketplace", "Vinted", "What Not", "Local"])
         
         if st.form_submit_button("Add to Inventory"):
             new_row = pd.DataFrame([{
@@ -39,7 +39,7 @@ with tab1:
                 "Platform": platform, "Status": "Listed", "Date Added": datetime.now().strftime("%Y-%m-%d")
             }])
             updated_df = pd.concat([data, new_row], ignore_index=True)
-            conn.update(spreadsheet=url, data=updated_df)
+            conn.update(spreadsheet=url, worksheet="Sheet1", data=updated_df)
             st.success(f"Added {name}!")
             st.rerun()
 
