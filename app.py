@@ -117,9 +117,13 @@ with tab3:
     if shipping_list.empty:
         st.write("✅ All orders shipped! Time to source more.")
     else:
-      for index, row in shipping_list.iterrows():
-    with st.expander(f"📦 SHIP: {row['Item Name']} (Location: {row.get('Storage Location', 'N/A')})"):
-        st.write(f"**Go to:** {row.get('Storage Location', 'Unknown')}") # Tells you where to walk
-        if st.button("Mark as Shipped", key=f"ship_{index}"):
-            # ... (shipping logic)
+        for index, row in shipping_list.iterrows():
+            with st.expander(f"SHIP: {row['Item Name']} ({row['Platform']})"):
+                st.write(f"**Platform:** {row['Platform']}")
+                st.write(f"**Category:** {row['Category']}")
+                if st.button(f"Mark as Shipped", key=f"ship_{index}"):
+                    data.at[index, "Status"] = "Shipped"
+                    conn.update(spreadsheet=url, data=data)
+                    st.success(f"Moved {row['Item Name']} to Archive")
+                    st.rerun()
                    
