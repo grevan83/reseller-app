@@ -67,7 +67,6 @@ with tab2:
     )
 
     if st.button("Update"):
-        df.update(edited_df)
         conn.update(spreadsheet=url, worksheet="Sheet1", data=edited_df)
         st.cache_data.clear()
         st.success("Updated")
