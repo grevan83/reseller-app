@@ -7,7 +7,7 @@ st.title("📈 Cloud Inventory Manager")
 
 # 1. Connect to Google Sheets
 # Replace 'your_sheet_url_here' with your actual Google Sheet link
-url = "https://docs.google.com/spreadsheets/d/1E-biBsQA9R8WRlD8tVGLCKFGyBEQVjd_ZSrDHePqQuo/edit?gid=0#gid=0"
+url = ""
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # 2. Read Existing Data
