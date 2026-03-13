@@ -22,6 +22,10 @@ data = load_data().dropna(how="all")
 data["Status"] = data["Status"].astype(str).str.strip()
 data["Status"] = data["Status"].replace("nan", "Listed") # Assume blank = Listed
 
+# Load data and clean empty rows
+df = conn.read(spreadsheet=url)
+df = df.dropna(how="all")
+
 # 3. NAVIGATION TABS
 tab1, tab2, tab3 = st.tabs(["🆕 Add Inventory", "📦 Active Listings", "🚚 Shipping Tasks"])
 
