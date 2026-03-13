@@ -60,15 +60,15 @@ with tab2:
 
 # --- TAB 3: PICK & SHIP ---
 with tab3:
-    st.header("Shipping List")
+    st.header("Items to Ship")
+    # Filter fresh data every time the tab reruns
     to_ship = data[data["Status"] == "Sold"]
     
-    if sold_items.empty:
-        st.write("✅ No items currently sold.")
+    if to_ship.empty:
+        st.write("✅ All items shipped!")
     else:
-        for index, row in sold_items.iterrows():
-            with st.button(f"📦 {row['Item Name']} ({row['Platform']})"):
-               if st.button(f"Mark {row['Item Name']} Shipped", key=f"ship_{index}"):
+        for index, row in to_ship.iterrows():
+            if st.button(f"Mark {row['Item Name']} Shipped", key=f"ship_{index}"):
                 # Update status
                 data.at[index, "Status"] = "Shipped"
                 # Push to cloud
