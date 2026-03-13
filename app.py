@@ -64,9 +64,9 @@ with tab2:
             data[col] = ""
 
     if active_df.empty:
-        st.write("Nothing in inventory.")
+        st.write("Nothing in inventory."),
     else:
-        st.write("Change status to **Sold** to move item to Shipping List")
+        st.write("Change status to **Sold** to move item to Shipping List"),
         
     
     # We define the column configuration here to force the dropdown
