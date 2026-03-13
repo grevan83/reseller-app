@@ -122,7 +122,4 @@ with tab3:
         st.write(f"**Go to:** {row.get('Storage Location', 'Unknown')}") # Tells you where to walk
         if st.button("Mark as Shipped", key=f"ship_{index}"):
             # ... (shipping logic)
-                    data.at[index, "Status"] = "Shipped"
-                    conn.update(spreadsheet=url, data=data)
-                    st.success(f"Moved {row['Item Name']} to Archive")
-                    st.rerun()
+                   
