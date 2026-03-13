@@ -18,6 +18,10 @@ def load_data():
 
 data = load_data().dropna(how="all")
 
+# Force all Statuses to be strings and remove hidden spaces
+data["Status"] = data["Status"].astype(str).str.strip()
+data["Status"] = data["Status"].replace("nan", "Listed") # Assume blank = Listed
+
 # 3. NAVIGATION TABS
 tab1, tab2, tab3 = st.tabs(["🆕 Add Inventory", "📦 Active Listings", "🚚 Shipping Tasks"])
 
