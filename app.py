@@ -62,68 +62,75 @@ with st.sidebar:
 # --- NAVIGATION TABS ---
 tab1, tab2, tab3 = st.tabs(["🆕 Add Inventory", "📦 Active Listings", "🚚 Shipping Tasks"])
 
-# --- TAB 1: DATA ENTRY ---
+# --- TAB 1: ADDING NEW ITEMS ---
 with tab1:
-    st.header("Log New Find")
-    with st.form("new_item_form", clear_on_submit=True):
-        col1, col2 = st.columns(2)
-        with col1:
-            name = st.text_input("Item Name")
-            cat = st.selectbox("Category", ["Electronics", "Clothing", "Toys", "Other"])
-        with col2:
-            buy_p = st.number_input("Purchase Price", min_value=0.0)
-            platform = st.selectbox("Primary Platform", ["eBay", "Poshmark", "Mercari", "Local"])
+    st.header("Sourcing Entry")
+    with st.form("entry_form", clear_on_submit=True):
+        c1, c2, c3 = st.columns(3)
+        name = c1.text_input("Item Name")
+        buy_p = c2.number_input("Buy Price", min_value=0.0)
+        loc = c3.text_input("Storage Location (Bin/Shelf)")
         
-        if st.form_submit_button("Add to Inventory"):
-            new_data = pd.DataFrame([{
-                "Item Name": name, "Category": cat, "Buy Price": buy_p, 
-                "Platform": platform, "Status": "Listed", "Date Added": datetime.now().strftime("%Y-%m-%d")
+        if st.form_submit_button("Save to Inventory"):
+            new_row = pd.DataFrame([{
+                "Item Name": name, "Buy Price": buy_p, 
+                "Location": loc, "Status": "Listed", 
+                "Date": datetime.now().strftime("%Y-%m-%d")
             }])
-            updated_df = pd.concat([data, new_data], ignore_index=True)
+            updated_df = pd.concat([df, new_row], ignore_index=True)
             conn.update(spreadsheet=url, data=updated_df)
-            st.success("Item Listed!")
+            st.success(f"Added {name} to inventory!")
             st.rerun()
 
-# --- TAB 2: STATUS MANAGER ---
+# --- TAB 2: VIEW & EDIT ACTIVE INVENTORY ---
 with tab2:
-    st.header("Inventory Status")
-    st.info("Change an item to 'Sold' here to move it to the Shipping list.")
+    st.header("Active Inventory")
     
-    # We only show items that aren't 'Shipped' or 'Archived'
-    active_items = data[data["Status"].isin(["Listed", "Sold"])]
-    
-    edited_data = st.data_editor(
-        active_items,
-        column_config={
-            "Status": st.column_config.SelectboxColumn("Status", options=["Listed", "Sold", "Returned"])
-        },
-        use_container_width=True,
-        key="status_editor"
-    )
+    # Filter for anything NOT shipped yet
+    active_mask = (df["Status"] != "Shipped")
+    active_df = df[active_mask]
 
-    if st.button("Update Statuses"):
-        # This logic merges the edits back into the main Google Sheet
-        data.update(edited_data)
-        conn.update(spreadsheet=url, data=data)
-        st.success("Inventory Updated!")
-        st.rerun()
-
-# --- TAB 3: PICK & SHIP (The Task List) ---
-with tab3:
-    st.header("Items to Ship")
-    # Only items marked as 'Sold' appear here
-    shipping_list = data[data["Status"] == "Sold"]
-    
-    if shipping_list.empty:
-        st.write("✅ All orders shipped! Time to source more.")
+    if active_df.empty:
+        st.write("No active inventory found. Go to 'Add New' to start!")
     else:
-        for index, row in shipping_list.iterrows():
-            with st.expander(f"SHIP: {row['Item Name']} ({row['Platform']})"):
-                st.write(f"**Platform:** {row['Platform']}")
-                st.write(f"**Category:** {row['Category']}")
-                if st.button(f"Mark as Shipped", key=f"ship_{index}"):
-                    data.at[index, "Status"] = "Shipped"
-                    conn.update(spreadsheet=url, data=data)
-                    st.success(f"Moved {row['Item Name']} to Archive")
+        st.write("👇 Change status to **'Sold'** to move item to Shipping List.")
+        
+        # This is your main status-changing engine
+        edited_df = st.data_editor(
+            active_df,
+            column_config={
+                "Status": st.column_config.SelectboxColumn(
+                    "Change Status",
+                    options=["Listed", "Sold", "Returned"],
+                    required=True,
+                )
+            },
+            disabled=["Item Name", "Date"], # Prevent accidental name changes
+            key="inventory_editor",
+            use_container_width=True
+        )
+
+        if st.button("Confirm Status Changes"):
+            # Update the original dataframe with changes from the editor
+            df.update(edited_df)
+            conn.update(spreadsheet=url, data=df)
+            st.success("Changes saved!")
+            st.rerun()
+
+# --- TAB 3: SHIPPING TASK LIST ---
+with tab3:
+    st.header("Orders to Ship")
+    # Only items marked as 'Sold' appear here
+    to_ship = df[df["Status"] == "Sold"]
+
+    if to_ship.empty:
+        st.success("Everything is shipped! Nice work.")
+    else:
+        for i, row in to_ship.iterrows():
+            with st.expander(f"📦 {row['Item Name']} — Location: {row['Location']}"):
+                st.write(f"**Step 1:** Pick from {row['Location']}")
+                st.write(f"**Step 2:** Pack and buy label.")
+                if st.button(f"Mark Shipped", key=f"btn_{i}"):
+                    df.at[i, "Status"] = "Shipped"
+                    conn.update(spreadsheet=url, data=df)
                     st.rerun()
-                   
