@@ -10,6 +10,14 @@ st.title("📈 Cloud Inventory Manager")
 url = ""
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+try:
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    data = conn.read(spreadsheet=url)
+    st.success("Successfully connected to Google Sheets!")
+except Exception as e:
+    st.error("Connection failed. Check your Secrets formatting.")
+    st.info(f"Technical error: {e}")
+
 # 2. Read Existing Data
 data = conn.read(spreadsheet=url, usecols=[0,1,2,3,4,5])
 data = data.dropna(how="all") # Clean up empty rows
