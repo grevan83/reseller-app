@@ -64,6 +64,7 @@ with tab2:
 
     if st.button("Save Changes"):
         conn.update(spreadsheet=url, data=edited_df)
+        st.cache_data.clear() 
         st.success("Cloud Updated!")
         st.rerun()
 
