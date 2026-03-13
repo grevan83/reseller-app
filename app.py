@@ -81,6 +81,6 @@ with tab3:
                 st.write(f"**Category:** {row['Category']}")
                 if st.button(f"Mark as Shipped", key=f"ship_{index}"):
                     data.at[index, "Status"] = "Shipped"
-                    conn.update(spreadsheet=url, data=data)
+                    conn.update(spreadsheet=url, worksheet = "Sheet1", data=data)
                     st.success(f"Moved {row['Item Name']} to Shipped!")
                     st.rerun()
