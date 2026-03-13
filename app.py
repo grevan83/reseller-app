@@ -14,10 +14,11 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 try:
     conn = st.connection("gsheets", type=GSheetsConnection)
     # Try to perform a test read
-    data = conn.read(spreadsheet=url)
+    data = conn.read(spreadsheet=url, worksheet="Sheet1")
+    data = data.dropna(how="all")
     st.sidebar.success("✅ Connected to Google Sheets")
 except Exception as e:
-    st.error("🚨 Connection Failed")
+    st.error("Authentication failed. Check if your Service Account Email is an 'Editor' on the Google Sheet.")
     st.write("There is an issue with your Secrets formatting or Google Permissions.")
     st.info(f"Error Details: {e}")
     st.stop() # This prevents the rest of the app from running and crashing
