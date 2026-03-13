@@ -32,8 +32,9 @@ except Exception as e:
 data = conn.read(spreadsheet=url, usecols=[0,1,2,3,4,5])
 data = data.dropna(how="all") # Clean up empty rows
 
+
 # --- SIDEBAR: INPUT ---
-with st.sidebar:
+\nwith st.sidebar:
     st.header("Add New Item")
     with st.form("add_form", clear_on_submit=True):
         name = st.text_input("Item Name")
@@ -60,6 +61,8 @@ with st.sidebar:
         conn.update(spreadsheet=url, data=updated_df)
         st.success("Data synced to Google Sheets!")
         st.rerun()
+    \n
+        
 
 # --- MAIN DASHBOARD ---
 # --- NAVIGATION TABS ---
