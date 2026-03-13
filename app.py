@@ -59,12 +59,13 @@ with tab2:
             )
         },
         use_container_width=True,
-        key="status_editor"
+        key="inventory_editor"
     )
 
-    if st.button("Save Changes"):
-        conn.update(spreadsheet=url, data=edited_df)
-        st.success("Cloud Updated!")
+    if st.button("Update"):
+        conn.update(spreadsheet=url, worksheet="Sheet1", data=edited_df)
+        st.cache_data.clear()
+        st.success("Updated")
         st.rerun()
 
 # --- TAB 3: PICK & SHIP ---
