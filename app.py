@@ -4,8 +4,8 @@ from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
 # 1. PAGE CONFIG (Only once)
-st.set_page_config(page_title="Reseller Pro Cloud", layout="wide")
-st.title("📈 Cloud Inventory Manager")
+st.set_page_config(page_title="KDS Reselling", layout="wide")
+st.title("📈 Stock Lists")
 
 # 2. CONNECTION
 url = "https://docs.google.com/spreadsheets/d/1E-biBsQA9R8WRlD8tVGLCKFGyBEQVjd_ZSrDHePqQuo/edit?usp=sharing"
