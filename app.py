@@ -73,7 +73,7 @@ with tab2:
     edited_df = st.data_editor(
         data, 
         column_config={
-            "Status": st.column_config.SelectboxColumn(
+            "Status":st.column_config.SelectboxColumn(
                 "Status",
                 help="Change item status",
                 options=["Listed", "Sold", "Returned", "Shipped"],
