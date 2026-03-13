@@ -47,26 +47,16 @@ with tab1:
 with tab2:
     st.header("Inventory Status")
     
-    # We define the column configuration here to force the dropdown
-    edited_df = st.data_editor(
-        data, 
-        column_config={
-            "Status": st.column_config.SelectboxColumn(
-                "Status",
-                help="Change item status",
-                options=["Listed", "Sold", "Returned", "Shipped"],
-                required=True,
-            )
-        },
-        use_container_width=True,
-        key="status_editor"
-    )
-
-    if st.button("Save Changes"):
+    # Use key=unique_id so Streamlit keeps track of this specific widget
+    edited_df = st.data_editor(data, use_container_width=True, key="inventory_editor")
+    
+    if st.button("Save Status Changes"):
+        # 1. Update Cloud
         conn.update(spreadsheet=url, data=edited_df)
+        # 2. Force the app to clear memory and pull fresh data from Google
         st.cache_data.clear() 
         st.success("Cloud Updated!")
-        st.rerun()
+        st.rerun() # This is the "magic" that clears the screen
 
 # --- TAB 3: PICK & SHIP ---
 with tab3:
