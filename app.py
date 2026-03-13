@@ -10,6 +10,19 @@ st.title("📈 Cloud Inventory Manager")
 url = "https://docs.google.com/spreadsheets/d/1E-biBsQA9R8WRlD8tVGLCKFGyBEQVjd_ZSrDHePqQuo/edit?usp=sharing"
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+try:
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    # Try to perform a test read
+    data = conn.read(spreadsheet=url)
+    st.sidebar.success("✅ Connected to Google Sheets")
+except Exception as e:
+    st.error("🚨 Connection Failed")
+    st.write("There is an issue with your Secrets formatting or Google Permissions.")
+    st.info(f"Error Details: {e}")
+    st.stop() # This prevents the rest of the app from running and crashing
+
+# --- The rest of your app only runs if the connection succeeds ---
+
 # 2. Read Existing Data
 data = conn.read(spreadsheet=url, usecols=[0,1,2,3,4,5])
 data = data.dropna(how="all") # Clean up empty rows
