@@ -50,6 +50,15 @@ with tab1:
 # --- TAB 2: ACTIVE LISTINGS ---
 with tab2:
     st.header("Inventory Status")
+
+    active_mask=(df["Status"] != "Shipped")
+    active_df=df[active_mask]
+
+    if active_df.empty:
+        st.write("Nothing in inventory.")
+    else:
+        st.write("Change status to **Sold** to move item to Shipping List")
+        
     
     # We define the column configuration here to force the dropdown
     edited_df = st.data_editor(
