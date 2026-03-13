@@ -34,7 +34,8 @@ data = data.dropna(how="all") # Clean up empty rows
 
 
 # --- SIDEBAR: INPUT ---
-\nwith st.sidebar:
+\n
+with st.sidebar:
     st.header("Add New Item")
     with st.form("add_form", clear_on_submit=True):
         name = st.text_input("Item Name")
