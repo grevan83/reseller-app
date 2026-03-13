@@ -59,7 +59,7 @@ with tab2:
     active_mask=(df["Status"] != "Shipped")
     active_df=df[active_mask]
 
-    for col in ["Buyer Name", "Shipping Service"]
+    for col in ["Buyer Name", "Shipping Service"]:
         if col not in data.columns:
             data[col] = ""
 
