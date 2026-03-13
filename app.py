@@ -70,18 +70,19 @@ with tab2:
 
 # --- TAB 3: PICK & SHIP ---
 with tab3:
-    st.header("Items to Ship")
-    sold_items = data[data["Status"] == "Sold"]
+    st.header("Shipping List")
+    to_ship = data[data["Status"] == "Sold"]
     
     if sold_items.empty:
-        st.info("✅ No items currently sold.")
+        st.write("✅ No items currently sold.")
     else:
         for index, row in sold_items.iterrows():
-            with st.expander(f"📦 {row['Item Name']} ({row['Platform']})"):
-                st.write(f"**Platform:** {row['Platform']}")
-                st.write(f"**Category:** {row['Category']}")
-                if st.button(f"Mark as Shipped", key=f"ship_{index}"):
-                    data.at[index, "Status"] = "Shipped"
-                    conn.update(spreadsheet=url, data=data)
-                    st.success(f"Moved {row['Item Name']} to Shipped!")
-                    st.rerun()
+            with st.button(f"📦 {row['Item Name']} ({row['Platform']})"):
+               if st.button(f"Mark {row['Item Name']} Shipped", key=f"ship_{index}"):
+                # Update status
+                data.at[index, "Status"] = "Shipped"
+                # Push to cloud
+                conn.update(spreadsheet=url, data=data)
+                # Clear cache and reload
+                st.cache_data.clear()
+                st.rerun()
