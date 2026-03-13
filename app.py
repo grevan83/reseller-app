@@ -34,8 +34,7 @@ data = data.dropna(how="all") # Clean up empty rows
 
 
 # --- SIDEBAR: INPUT ---
-\n
-with st.sidebar:
+\n with st.sidebar:
     st.header("Add New Item")
     with st.form("add_form", clear_on_submit=True):
         name = st.text_input("Item Name")
@@ -61,8 +60,7 @@ with st.sidebar:
         updated_df = pd.concat([data, new_row], ignore_index=True)
         conn.update(spreadsheet=url, data=updated_df)
         st.success("Data synced to Google Sheets!")
-        st.rerun()
-    \n
+        st.rerun() \n
         
 
 # --- MAIN DASHBOARD ---
