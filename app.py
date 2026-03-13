@@ -81,7 +81,9 @@ with tab2:
             )
             "Buyer Name": st.column_config,TextColumn("Buyer Name")
             "Provider": st.column_config.SelectionboColumn(
-                "Provider", options=["Royal Mail", "Evri", "InPost", "Yodel"], required=True
+                "Provider", 
+                options=["Royal Mail", "Evri", "InPost", "Yodel"], 
+                required=True
             )
         },
         use_container_width=True,
