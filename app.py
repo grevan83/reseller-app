@@ -66,7 +66,6 @@ with tab2:
         conn.update(spreadsheet=url, data=edited_df)
         st.success("Cloud Updated!")
         st.rerun()
-Why this is likely failing:
 
 # --- TAB 3: PICK & SHIP ---
 with tab3:
