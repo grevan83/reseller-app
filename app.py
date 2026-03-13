@@ -82,7 +82,7 @@ with tab2:
             "Buyer Name": st.column_config.TextColumn("Buyer Name"),
             "Provider": st.column_config.SelectboxColumn(
                 "Provider",
-                help="Select Provider"
+                help="Select Provider",
                 options=["Royal Mail", "Evri", "InPost", "Yodel"], 
                 required=True,
             )
