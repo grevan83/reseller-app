@@ -79,7 +79,7 @@ with tab2:
                 options=["Listed", "Sold", "Returned", "Shipped"],
                 required=True,
             ),
-            "Buyer Name": st.column_config.TextColumn("Buyer Name"):
+            "Buyer Name": st.column_config.TextColumn("Buyer Name")
             "Provider": st.column_config.SelectionboColumn(
                 "Provider", 
                 options=["Royal Mail", "Evri", "InPost", "Yodel"], 
